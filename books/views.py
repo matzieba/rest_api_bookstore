@@ -42,7 +42,7 @@ class BookListAPIVIew(generics.ListAPIView):
             if queryset:
                 return queryset
             else:
-                Response({'error': 'no book matching your criteria'})
+                return Response({'error': 'no book matching your criteria'})
         else:
             return Book.objects.all()
 
