@@ -37,10 +37,10 @@ class BookListAPIVIew(generics.ListAPIView):
             date_from = params.get('from')
             date_to = params.get('to')
             acquired = params.get('acquired').capitalize()
-            if Book.objects.filter(authors = filter_para_author, published_year__gte = date_from,
-                                           published_year__lte = date_to, acquired = acquired):
-                return Book.objects.filter(authors = filter_para_author, published_year__gte = date_from,
+            queryset = Book.objects.filter(authors = filter_para_author, published_year__gte = date_from,
                                            published_year__lte = date_to, acquired = acquired)
+            if queryset:
+                return queryset
             else:
                 Response({'error': 'no book matching your criteria'})
         else:
