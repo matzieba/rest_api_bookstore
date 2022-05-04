@@ -28,19 +28,21 @@ class BookListAPIVIew(generics.ListAPIView):
     def get_queryset(self):
         params = self.request.query_params
         if params:
-            # z tego zrobic funkcje
             authors_list = Book.objects.values_list('authors', flat=True)
             author = params.get('author')[1:][:-1]
             filter_para_author =''
-            # tu list comprehension
             for authors in authors_list:
                 if author in authors:
                     filter_para_author = authors
             date_from = params.get('from')
             date_to = params.get('to')
             acquired = params.get('acquired').capitalize()
-            return Book.objects.filter(authors = filter_para_author, published_year__gte = date_from,
+            if Book.objects.filter(authors = filter_para_author, published_year__gte = date_from,
+                                           published_year__lte = date_to, acquired = acquired):
+                return Book.objects.filter(authors = filter_para_author, published_year__gte = date_from,
                                            published_year__lte = date_to, acquired = acquired)
+            else:
+                Response({'empty': 'no book matching your criteria'})
         else:
             return Book.objects.all()
 
