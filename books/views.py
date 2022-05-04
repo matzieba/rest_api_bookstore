@@ -23,7 +23,6 @@ book_create_view = BookCreateAPIView.as_view()
 
 # List + List filtering
 class BookListAPIVIew(generics.ListAPIView):
-
     serializer_class = BookSerializer
     def get_queryset(self):
         params = self.request.query_params
@@ -37,19 +36,15 @@ class BookListAPIVIew(generics.ListAPIView):
             date_from = params.get('from')
             date_to = params.get('to')
             acquired = params.get('acquired').capitalize()
-            queryset = Book.objects.filter(authors = filter_para_author, published_year__gte = date_from,
+            return Book.objects.filter(authors = filter_para_author, published_year__gte = date_from,
                                            published_year__lte = date_to, acquired = acquired)
-            if queryset:
-                return queryset
-            else:
-                return Response({'error': 'no book matching your criteria'})
         else:
             return Book.objects.all()
 
 book_list_view = BookListAPIVIew.as_view()
 
-# Retrive, Update, Delete
 
+# Retrive, Update, Delete
 class ProductMixinView(
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
