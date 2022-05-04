@@ -42,7 +42,7 @@ class BookListAPIVIew(generics.ListAPIView):
                 return Book.objects.filter(authors = filter_para_author, published_year__gte = date_from,
                                            published_year__lte = date_to, acquired = acquired)
             else:
-                Response({'empty': 'no book matching your criteria'})
+                Response({'error': 'no book matching your criteria'})
         else:
             return Book.objects.all()
 
