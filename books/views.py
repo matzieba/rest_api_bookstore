@@ -27,7 +27,7 @@ class BookListAPIVIew(generics.ListAPIView):
     def get_queryset(self):
         params = self.request.query_params
         if params:
-            #setting up the filter values
+            #prepering author parameter that the filter really works
             authors_list = Book.objects.values_list('authors', flat=True)
             filter_dict = {}
             if params.get('author'):
@@ -47,9 +47,11 @@ class BookListAPIVIew(generics.ListAPIView):
                 acquired = params.get('acquired').capitalize()
                 filter_dict['acquired'] = acquired
             if params.get('title'):
-                title = params.get('title')
+                title = params.get('title').capitalize()
                 filter_dict['title'] = title
+                # code same mechanism as with author
             queryset = Book.objects.filter(**filter_dict)
+            print(filter_dict)
             return queryset
         else:
             return Book.objects.all()
@@ -79,43 +81,9 @@ class ProductMixinView(
 
 product_mixin_view = ProductMixinView.as_view()
 
-# import + create/update
 
-@api_view(['POST'])
-def book_import_view(request):
-    url = f'https://www.googleapis.com/books/v1/volumes?q={request.data}'
-    response = requests.get(url)
-    counter_new = 0
-    authors = ""
-    for item in response.json()['items']:
-        try:
-            for author in item['volumeInfo']['authors']:
-                authors += author + " "
-        except KeyError:
-            continue
-        try:
-            book = {
-                'title':item['volumeInfo']['title'],
-                'authors':authors,
-                'acquired':False,
-                'published_year':int(item['volumeInfo']['publishedDate'][0:4])
-            }
-            authors = ""
-        except KeyError:
-            continue
-        if Book.objects.filter(title=book['title']).exists():
-            Book.objects.filter(title=book['title']).update(
-                **book)
-        else:
-            serializer = BookSerializer(data=book)
-            if (serializer.is_valid()):
-                serializer.save()
-                counter_new +=1
-            else:
-                return Response(serializer.errors)
-    return Response({'imported':counter_new})
-
-class ProductMixinView(
+#import + create/update
+class ProductMixinViewImport(
     generics.GenericAPIView
     ):
     def post(self, request):
@@ -139,17 +107,17 @@ class ProductMixinView(
                 authors = ""
             except KeyError:
                 continue
-        if Book.objects.filter(title = book['title']).exists():
-            Book.objects.filter(title = book['title']).update(
-                    **book)
-        else:
-            serializer = BookSerializer(data=book)
-        if (serializer.is_valid()):
-            serializer.save()
-            counter_new += 1
-            return Response(True)
-        else:
-            return Response(serializer.errors)
+            if Book.objects.filter(title = book['title']).exists():
+                Book.objects.filter(title = book['title']).update(
+                        **book)
+            else:
+                serializer = BookSerializer(data=book)
+                if (serializer.is_valid()):
+                    serializer.save()
+                    counter_new += 1
+                else:
+                    return Response(serializer.errors)
         return Response({'imported': counter_new})
 
+product_mixin_view_import = ProductMixinViewImport.as_view()
 
