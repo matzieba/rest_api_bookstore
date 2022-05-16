@@ -86,6 +86,7 @@ product_mixin_view = ProductMixinView.as_view()
 class ProductMixinViewImport(
     generics.GenericAPIView
     ):
+    serializer_class = BookSerializer
     def post(self, request):
         url = f'https://www.googleapis.com/books/v1/volumes?q={request.data}'
         response = requests.get(url)
